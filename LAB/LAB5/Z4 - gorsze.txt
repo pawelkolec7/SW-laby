@@ -1,0 +1,22 @@
+import Adafruit_BBIO.GPIO as GPIO
+import time
+GPIO.setup("GPIO0_20", GPIO.OUT)
+while True:
+    for _ in range(3):
+        GPIO.output("GPIO0_20", GPIO.HIGH)
+        time.sleep(0.25)
+        GPIO.output("GPIO0_20", GPIO.LOW)
+        time.sleep(0.25)
+    time.sleep(0.5)
+    for _ in range(3):
+        GPIO.output("GPIO0_20", GPIO.HIGH)
+        time.sleep(0.75)
+        GPIO.output("GPIO0_20", GPIO.LOW)
+        time.sleep(0.25)
+    time.sleep(0.5)
+    for _ in range(3):
+        GPIO.output("GPIO0_20", GPIO.HIGH)
+        time.sleep(0.25)
+        GPIO.output("GPIO0_20", GPIO.LOW)
+        time.sleep(0.25)
+    time.sleep(3)

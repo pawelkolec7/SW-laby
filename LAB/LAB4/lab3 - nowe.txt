@@ -1,0 +1,80 @@
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+#include <Servo.h>
+
+#define PIN_BUTTON 2
+#define PIN_SERVO 3
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+bool isBlocked = true;
+bool isOpened = false;
+
+Servo servo;
+
+void setup() {
+    Wire.begin();
+    Serial.begin(9600);
+    pinMode(PIN_BUTTON, INPUT_PULLUP);
+    
+    servo.attach(PIN_SERVO);
+    servo.write(0);
+    
+    lcd.init();
+    lcd.backlight();
+    printCurrentState();
+    
+    attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), handleButton, FALLING);
+}
+
+void printTemporaryMessage(const String &line) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(line);
+    delay(3000);
+    printCurrentState();
+}
+
+void printCurrentState() {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(isOpened ? "Open" : "Closed");
+    lcd.setCursor(0, 1);
+    lcd.print(isBlocked ? "Blocked" : "Unblocked");
+}
+
+void handleButton() {
+    isBlocked = !isBlocked;
+    Serial.println("button clicked");
+    printCurrentState();
+}
+
+void open(bool newOpened) {
+    if (isBlocked) {
+        Serial.println("I am blocked!");
+        return;
+    }
+
+    if (isOpened == newOpened) {
+        printTemporaryMessage(newOpened ? "Already open" : "Already closed");
+    } else {
+        isOpened = newOpened;
+        servo.write(isOpened ? 90 : 0);
+        printCurrentState();
+    }
+}
+
+void loop() {
+    if (Serial.available()) {
+        String str = Serial.readStringUntil('\n');
+        str.trim();
+        
+        if (str == "o") {
+            open(true);
+        } else if (str == "c") {
+            open(false);
+        } else {
+            printTemporaryMessage("wrong cmd");
+        }
+    }
+}
